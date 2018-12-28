@@ -7,13 +7,13 @@ use shader_version::glsl::GLSL;
 use graphics::{Context, DrawState, Graphics, Viewport};
 use graphics::color::gamma_srgb_to_linear;
 use graphics::BACK_END_MAX_VERTEX_COUNT as BUFFER_SIZE;
-use gl;
-use gl::types::{GLint, GLsizei, GLuint};
+use crate::gl;
+use crate::gl::types::{GLint, GLsizei, GLuint};
 
 // Local crate.
-use draw_state;
-use Texture;
-use shader_utils::{compile_shader, DynamicAttribute};
+use crate::draw_state;
+use crate::Texture;
+use crate::shader_utils::{compile_shader, DynamicAttribute};
 
 // The number of chunks to fill up before rendering.
 // Amount of memory used: `BUFFER_SIZE * CHUNKS * 4 * (2 + 4)`

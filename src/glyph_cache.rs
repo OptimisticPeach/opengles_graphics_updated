@@ -1,6 +1,7 @@
 //! Glyph caching
 
-use {rusttype, graphics, Texture, TextureSettings};
+use {rusttype, graphics};
+use crate::{Texture, TextureSettings};
 use std::collections::HashMap;
 use graphics::types::Scalar;
 
@@ -11,7 +12,7 @@ use std::hash::BuildHasherDefault;
 use std::path::Path;
 use std::io::Read;
 use std::fs::File;
-use error::Error;
+use crate::error::Error;
 
 pub use graphics::types::FontSize;
 use graphics::character::CharacterCache;
@@ -23,6 +24,8 @@ pub type Character<'a> = graphics::character::Character<'a, Texture>;
 pub struct GlyphCache<'a> {
     /// The font.
     pub font: rusttype::Font<'a>,
+    /// The settings to render the font with.
+    settings: TextureSettings,
     // Maps from fontsize and character to offset, size and texture.
     data: HashMap<(FontSize, char),
                   ([Scalar; 2], [Scalar; 2], Texture),
@@ -31,36 +34,38 @@ pub struct GlyphCache<'a> {
 
 impl<'a> GlyphCache<'a> {
     /// Constructs a GlyphCache from a Font.
-    pub fn from_font(font: rusttype::Font<'a>) -> Self {
+    pub fn from_font(font: rusttype::Font<'a>, settings: TextureSettings) -> Self {
         let fnv = BuildHasherDefault::<FnvHasher>::default();
         GlyphCache {
             font: font,
+            settings: settings,
             data: HashMap::with_hasher(fnv),
         }
     }
 
     /// Constructor for a GlyphCache.
-    pub fn new<P>(font: P) -> Result<GlyphCache<'static>, Error>
+    pub fn new<P>(font: P, settings: TextureSettings) -> Result<GlyphCache<'static>, Error>
         where P: AsRef<Path>
     {
         let fnv = BuildHasherDefault::<FnvHasher>::default();
-        let mut file = try!(File::open(font));
+        let mut file = File::open(font)?;
         let mut file_buffer = Vec::new();
-        try!(file.read_to_end(&mut file_buffer));
+        file.read_to_end(&mut file_buffer)?;
 
-        let collection = rusttype::FontCollection::from_bytes(file_buffer);
+        let collection = rusttype::FontCollection::from_bytes(file_buffer).unwrap();
         let font = collection.into_font().unwrap();
         Ok(GlyphCache {
             font: font,
+            settings: settings,
             data: HashMap::with_hasher(fnv),
         })
     }
 
     /// Creates a GlyphCache for a font stored in memory.
-    pub fn from_bytes(font: &'a [u8]) -> Result<GlyphCache<'a>, Error> {
-        let collection = rusttype::FontCollection::from_bytes(font);
+    pub fn from_bytes(font: &'a [u8], settings: TextureSettings) -> Result<GlyphCache<'a>, Error> {
+        let collection = rusttype::FontCollection::from_bytes(font).unwrap();
         let font = collection.into_font().unwrap();
-        Ok(Self::from_font(font))
+        Ok(Self::from_font(font, settings))
     }
 
     /// Load all characters in the `chars` iterator for `size`
@@ -93,8 +98,9 @@ impl<'a> GlyphCache<'a> {
 
 impl<'b> CharacterCache for GlyphCache<'b> {
     type Texture = Texture;
+    type Error = Error;
 
-    fn character<'a>(&'a mut self, size: FontSize, ch: char) -> Character<'a> {
+    fn character<'a>(&'a mut self, size: FontSize, ch: char) -> Result<Character<'a>, Error> {
         use std::collections::hash_map::Entry;
         use rusttype as rt;
 
@@ -104,22 +110,24 @@ impl<'b> CharacterCache for GlyphCache<'b> {
             //returning `into_mut()' to get reference with 'a lifetime
             Entry::Occupied(v) => {
                 let &mut (offset, size, ref texture) = v.into_mut();
-                Character {
-                    offset: offset,
-                    size: size,
-                    texture: texture,
-                }
+                Ok(
+                    Character {
+                        offset: offset,
+                        size: size,
+                        texture: texture,
+                    }
+                )
             }
             Entry::Vacant(v) => {
                 // this is only None for invalid GlyphIds,
                 // but char is converted to a Codepoint which must result in a glyph.
-                let glyph = self.font.glyph(ch).unwrap();
+                let glyph = self.font.glyph(ch);
                 let scale = rt::Scale::uniform(size as f32);
                 let mut glyph = glyph.scaled(scale);
 
                 // some fonts do not contain glyph zero as fallback, instead try U+FFFD.
                 if glyph.id() == rt::GlyphId(0) && glyph.shape().is_none() {
-                    glyph = self.font.glyph('\u{FFFD}').unwrap().scaled(scale);
+                    glyph = self.font.glyph('\u{FFFD}').scaled(scale);
                 }
 
                 let h_metrics = glyph.h_metrics();
@@ -153,15 +161,15 @@ impl<'b> CharacterCache for GlyphCache<'b> {
                                       Texture::from_memory_alpha(&image_buffer,
                                                                  pixel_bb_width as u32,
                                                                  pixel_bb_height as u32,
-                                                                 &TextureSettings::new())
+                                                                 &self.settings)
                                           .unwrap()
                                   }
                               }));
-                Character {
+                Ok(Character {
                     offset: offset,
                     size: size,
                     texture: texture,
-                }
+                })
             }
         }
     }

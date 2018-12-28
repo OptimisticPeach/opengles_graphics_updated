@@ -1,8 +1,8 @@
 //! Helper functions for dealing with shaders.
 
 // External crates.
-use gl;
-use gl::types::{GLboolean, GLchar, GLenum, GLint, GLsizeiptr, GLuint};
+use crate::gl;
+use crate::gl::types::{GLboolean, GLchar, GLenum, GLint, GLsizeiptr, GLuint};
 use std::ffi::CString;
 use std::{ptr, mem};
 
@@ -52,7 +52,7 @@ impl DynamicAttribute {
            normalize: GLboolean,
            ty: GLenum)
            -> Result<Self, String> {
-        let location = try!(attribute_location(program, name));
+        let location = attribute_location(program, name)?;
         let mut vbo = 0;
         unsafe {
             gl::GenBuffers(1, &mut vbo);

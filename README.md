@@ -1,3 +1,8 @@
+#THIS IS MEANT TO BE A DEPENDENCY FOR `android_base`
+
+
+
+
 # opengles_graphics [![Build Status](https://travis-ci.org/PistonDevelopers/opengl_graphics.svg)](https://travis-ci.org/Drakulix/opengles_graphics) [![Crates.io](https://img.shields.io/crates/v/opengles_graphics.svg)](https://crates.io/crates/opengles_graphics) [![Crates.io](https://img.shields.io/crates/l/opengles_graphics.svg)](https://github.com/Drakulix/opengles_graphics/blob/master/LICENSE)
 
 An OpenGL ES 2D back-end for the Piston game engine

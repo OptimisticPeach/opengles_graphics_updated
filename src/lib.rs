@@ -11,8 +11,8 @@ extern crate rusttype;
 extern crate texture as texture_lib;
 
 pub use shader_version::OpenGL;
-pub use back_end::GlGraphics;
-pub use texture::Texture;
+pub use crate::back_end::GlGraphics;
+pub use crate::texture::Texture;
 pub use texture_lib::*;
 
 pub mod shader_utils;

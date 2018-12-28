@@ -1,10 +1,10 @@
-use gl;
-use gl::types::GLuint;
+use crate::gl;
+use crate::gl::types::GLuint;
 use image::{self, DynamicImage, RgbaImage};
 
 use std::path::Path;
 
-use {ops, ImageSize, CreateTexture, UpdateTexture, TextureSettings, Format, Filter};
+use crate::{ops, ImageSize, CreateTexture, UpdateTexture, TextureSettings, Format, Filter};
 
 trait GlSettings {
     fn get_gl_mag(&self) -> gl::types::GLenum;
@@ -218,5 +218,11 @@ impl UpdateTexture<()> for Texture {
         }
 
         Ok(())
+    }
+}
+
+impl graphics::ImageSize for Texture {
+    fn get_size(&self) -> (u32, u32) {
+        (self.width, self.height)
     }
 }

@@ -1,4 +1,4 @@
-use gl;
+use crate::gl;
 use graphics::draw_state::*;
 
 pub fn bind_state(old_state: &DrawState, new_state: &DrawState) {
