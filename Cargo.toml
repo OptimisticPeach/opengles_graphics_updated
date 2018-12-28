@@ -1,6 +1,6 @@
 [package]
 name = "optimisticpeach-opengles_graphics"
-version = "0.1.3"
+version = "0.1.4"
 authors = [
     "bvssvni <bvssvni@gmail.com>",
     "Coeuvre <coeuvre@gmail.com>",
@@ -19,8 +19,8 @@ keywords = ["opengles", "graphics", "2d", "piston"]
 description = "An OpenGL ES 2D back-end for the Piston game engine"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/Drakulix/opengles_graphics.git"
-homepage = "https://github.com/Drakulix/opengles_graphics"
+repository = "https://github.com/OptimisticPeach/opengles_graphics_updated.git"
+homepage = "https://github.com/OptimisticPeach/opengles_graphics_updated.git"
 build = "build.rs"
 
 [lib]
